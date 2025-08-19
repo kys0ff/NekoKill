@@ -1,5 +1,6 @@
-package off.kys.pkill
+package off.kys.pkill.data.manager
 
+import off.kys.pkill.domain.model.ProcessInfo
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -59,23 +60,31 @@ object ProcessManager {
 
     /**
      * Restarts a process identified by its process ID (PID).
+     * This operation runs asynchronously to avoid blocking the UI thread.
      *
      * @param pid The process ID of the process to restart.
-     * @return `true` if the process was successfully restarted, `false` otherwise.
+     * @param onResult Optional callback to handle the result (true if successful, false otherwise).
      */
-    fun restartProcess(pid: Int): Boolean {
-        return try {
-            val command = readProcessCmdline(pid)
+    fun restartProcess(pid: Int, onResult: ((Boolean) -> Unit)? = null) {
+        Thread {
+            try {
+                val command = readProcessCmdline(pid)
 
-            if (command.isBlank()) return false
-            if (!killProcess(pid)) return false
+                val result = if (command.isBlank()) {
+                    false
+                } else if (!killProcess(pid)) {
+                    false
+                } else {
+                    val restartProcess = ProcessBuilder("bash", "-c", command).start()
+                    restartProcess.waitFor() == 0
+                }
 
-            val restartProcess = ProcessBuilder("bash", "-c", command).start()
-            restartProcess.waitFor() == 0
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+                onResult?.invoke(result)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult?.invoke(false)
+            }
+        }.start()
     }
 
     /**
@@ -108,11 +117,10 @@ object ProcessManager {
         val file = File("/proc/$pid/cmdline")
         return try {
             val raw = file.readText().replace("\u0000", " ").trim()
-            // If it’s an AppImage, extract a friendly name
-            if (raw.contains(".AppImage")) {
-                val parts = raw.split(" ")
-                val appImagePath = parts[0]
-                File(appImagePath).name // e.g. "MyApp-x86_64.AppImage"
+
+            val entry = DesktopEntryManager.getDesktopEntryForPid(pid)
+            if (entry != null) {
+                entry.exec ?: raw
             } else {
                 raw
             }
