@@ -28,9 +28,9 @@ fun MainScreen() {
     LaunchedEffect(Unit) {
         runCatching {
             activeProcesses.clear()
-            val nonSystemProcesses = ProcessManager.getActiveProcesses()
+            val allProcesses = ProcessManager.getActiveProcesses()
 
-            nonSystemProcesses.forEach { process ->
+            allProcesses.forEach { process ->
                 val entry = DesktopEntryManager.getDesktopEntryForPid(process.pid)
 
                 if (entry != null) {
@@ -40,11 +40,7 @@ fun MainScreen() {
                 }
             }
 
-            // ✅ Group processes by their desktop entry (so same app stays together)
-            activeProcesses.sortWith(compareBy(
-                { it.desktopEntry == null }, // put ones with no entry last
-                { it.desktopEntry?.name ?: it.name } // group by app name or process name
-            ))
+            activeProcesses.sortBy { it.name }
         }.onFailure { e ->
             println("Failed to update active processes: ${e.message}")
         }
