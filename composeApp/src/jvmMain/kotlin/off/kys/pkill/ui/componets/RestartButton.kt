@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import off.kys.pkill.SHAPE_RADIUS
+import off.kys.pkill.data.locale.LocaleHelper
 
 @Composable
 fun RestartButton(onClick: () -> Unit) {
@@ -27,7 +28,7 @@ fun RestartButton(onClick: () -> Unit) {
             .padding(start = 4.dp, end = 4.dp)
     ) {
         Text(
-            text = "Restart",
+            text = LocaleHelper.getString("restart"),
             color = Color.White,
             fontSize = 15.sp
         )

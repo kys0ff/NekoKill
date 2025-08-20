@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import nekokill.composeapp.generated.resources.Res
 import nekokill.composeapp.generated.resources.icon
+import off.kys.pkill.data.locale.LocaleHelper
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -33,7 +34,7 @@ fun AppHeader() {
         Spacer(Modifier.size(12.dp))
 
         Text(
-            text = "NekoKill",
+            text = LocaleHelper.getString("app_name"),
             color = Color.White,
             style = MaterialTheme.typography.titleLarge.copy(fontSize = 26.sp)
         )
