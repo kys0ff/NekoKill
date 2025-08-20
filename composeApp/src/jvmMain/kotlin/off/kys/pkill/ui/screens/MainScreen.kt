@@ -28,7 +28,7 @@ fun MainScreen() {
     LaunchedEffect(Unit) {
         runCatching {
             activeProcesses.clear()
-            val nonSystemProcesses = ProcessManager.getNonSystemProcesses()
+            val nonSystemProcesses = ProcessManager.getActiveProcesses()
 
             nonSystemProcesses.forEach { process ->
                 val entry = DesktopEntryManager.getDesktopEntryForPid(process.pid)

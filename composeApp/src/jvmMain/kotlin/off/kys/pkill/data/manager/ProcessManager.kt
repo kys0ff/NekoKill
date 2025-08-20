@@ -6,23 +6,22 @@ import java.io.File
 import java.io.InputStreamReader
 
 /**
- * Provides functionality to manage system processes, including retrieving non-system processes,
- * killing processes, and restarting processes.
+ * The `ProcessManager` object provides a high-level interface for managing
+ * system processes, including retrieving active processes, terminating processes,
+ * and restarting processes.
  */
 object ProcessManager {
 
     /**
-     * Retrieves a list of non-system processes running on the system.
-     * A non-system process is defined as a process not owned by the "root" user
-     * and not initiated as the very first process in the system.
+     * Retrieves a list of active processes currently running on the system.
+     * Each process is represented by a `ProcessInfo` object containing
+     * details such as process ID, user, name, and command information.
      *
-     * @return A list of process information, where each item contains details
-     * such as the process ID (PID), user, name, and command line arguments
-     * of the respective non-system process.
+     * @return A list of `ProcessInfo` objects representing the active processes.
      */
-    fun getNonSystemProcesses(): List<ProcessInfo> {
+    fun getActiveProcesses(): List<ProcessInfo> {
         val processList = mutableListOf<ProcessInfo>()
-        val cmd = arrayOf("bash", "-c", "ps -eo pid,user --no-headers | grep -v '^ *1 ' | grep -v 'root'")
+        val cmd = arrayOf("bash", "-c", "ps -eo pid,user --no-headers")
 
         val process = ProcessBuilder(*cmd).start()
         BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
@@ -48,14 +47,12 @@ object ProcessManager {
      * @param pid The process ID of the process to be terminated.
      * @return True if the process was successfully terminated, false otherwise.
      */
-    fun killProcess(pid: Int): Boolean {
-        return try {
-            val process = ProcessBuilder("kill", "-9", pid.toString()).start()
-            process.waitFor() == 0
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
+    fun killProcess(pid: Int): Boolean = try {
+        val process = ProcessBuilder("kill", "-9", pid.toString()).start()
+        process.waitFor() == 0
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
     }
 
     /**
